@@ -1,0 +1,1 @@
+{"data":{"site":{"siteMetadata":{"title":"Jamie's Blog","description":"个人博客，随便写写."}},"allMarkdownRemark":{"edges":[{"node":{"fields":{"slug":"/基于Jenkins和Docker实现SSH远程部署/","langKey":"en"},"timeToRead":2,"frontmatter":{"date":"January 25, 2019","title":"基于Jenkins和Docker实现SSH远程部署","spoiler":"如何快速通过Docker搭建Jenkins服务，利用SSH插件实现远程自动化部署"}}}]}},"pageContext":{"slug":"/","langKey":"en"}}

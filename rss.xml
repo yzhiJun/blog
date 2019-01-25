@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Jamie's Blog]]></title><description><![CDATA[个人博客，随便写写.]]></description><link>https://github.com/yzhiJun/blog</link><generator>RSS for Node</generator><lastBuildDate>Fri, 25 Jan 2019 09:27:48 GMT</lastBuildDate><item><title><![CDATA[基于Jenkins和Docker实现SSH远程部署]]></title><description><![CDATA[如何快速通过Docker搭建Jenkins服务，利用SSH插件实现远程自动化部署]]></description><link>https://github.com/yzhiJun/blog/基于Jenkins和Docker实现SSH远程部署/</link><guid isPermaLink="false">https://github.com/yzhiJun/blog/基于Jenkins和Docker实现SSH远程部署/</guid><content:encoded>&lt;p&gt;最近迁移服务，并试用了阿里的&lt;a href=&quot;https://www.aliyun.com/product/codepipeline&quot;&gt;CodePipeline&lt;/a&gt;持续集成服务，发现还是不如自己搭建Jenkins定制化部署好，本文主要介绍如何通过Docker快速搭建Jenkins服务，并利用&lt;a href=&quot;https://wiki.jenkins.io/display/JENKINS/SSH+plugin&quot;&gt;SSH+Plugin&lt;/a&gt;实现远程部署&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;所需环境&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;系统：CentOS 7&lt;/li&gt;
+&lt;li&gt;两台服务器（其中一台需要装有Docker环境，以便部署Jenkins）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&quot;step-1-部署jenkins&quot;&gt;&lt;a href=&quot;#step-1-%E9%83%A8%E7%BD%B2jenkins&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 1: 部署Jenkins&lt;/h3&gt;
+&lt;p&gt;登录ECS1，使用Docker进行部署，并暴露8080端口以便外部访问：&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;docker run \
+  -d \
+  -u root \
+  -p 8080:8080 \
+  -v jenkins-data:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --name jenkins \
+  jenkinsci/blueocean&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;由于大部分云服务默认会禁掉非常用端口，可以简单配置域名，通过nginx代理访问：&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;server {
+    listen    80;
+    server_name    jenkins.youdomain.com;
+
+    location / {
+        proxy_pass http://localhost:8080;
+    }
+}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;至此Jenkins已经在ECS1上部署好，可通过刚配置的域名进行访问，默认初始密码可通过 &lt;code class=&quot;language-text&quot;&gt;docker logs -f jenkins&lt;/code&gt; 日志获得&lt;/p&gt;
+&lt;h3 id=&quot;step-2-安装ssh插件&quot;&gt;&lt;a href=&quot;#step-2-%E5%AE%89%E8%A3%85ssh%E6%8F%92%E4%BB%B6&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 2: 安装SSH插件&lt;/h3&gt;
+&lt;p&gt;启动Jenkins后，可通过系统管理/插件管理进行SSH的插件安装&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/ef9ea/plugin_install.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 23.541666666666664%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAFCAYAAABFA8wzAAAACXBIWXMAAAsSAAALEgHS3X78AAAAzUlEQVQY022Q3WrDMAyF8/6P1uvuomwUOhhjY4njJP6TZJ/KalNamOEgyxy+I3lwzoGFwJUglVWEQsne9t5q43v/qtoEWf3EGQ2CoRSBnQZ4v2L2G8ZxQkpqIlIxUkyIKioaVsqLvF/MP00Ol69vDMZqzZijW3A8nuDcbOYY40O9Z+Z7iG7Et7puQcMzcs44vL1j6LAdmHWCj/Mn/jQxhIAQgxk7qNb6r/oGvXbGr/PPwKb/qFPOG5Z109RoE4jIA7h7n1VI9B9v959pxhW3FoZ4eSEoOQAAAABJRU5ErkJggg==&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;ssh 插件安装&quot;
+        title=&quot;&quot;
+        src=&quot;https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fb8a0/plugin_install.png&quot;
+        srcset=&quot;https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/1a291/plugin_install.png 148w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/2bc4a/plugin_install.png 295w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fb8a0/plugin_install.png 590w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/526de/plugin_install.png 885w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fa2eb/plugin_install.png 1180w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/08f6a/plugin_install.png 1770w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/ef9ea/plugin_install.png 1920w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;h3 id=&quot;step-3-生成jenkins-ssh密钥对&quot;&gt;&lt;a href=&quot;#step-3-%E7%94%9F%E6%88%90jenkins-ssh%E5%AF%86%E9%92%A5%E5%AF%B9&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 3: 生成Jenkins SSH密钥对&lt;/h3&gt;
+&lt;p&gt;由于我们的Jenkins是通过Docker进行部署，你可以把它看成一台具有独立环境的虚拟机，这样可以在容器环境里配置SSH密钥对，让Jenkins通过公网IP与宿主机ECS1或远程机ECS2进行SSH连接，这里我们通过直接修改容器的方式进行生成密钥：&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/597c7/ssh_config.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 55.36912751677852%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAALCAYAAAB/Ca1DAAAACXBIWXMAAAsSAAALEgHS3X78AAAA7ElEQVQoz6WS2QqEMBRDXXBDcd+r7aj4/5+YIRf6NsNU5iEULvQ0vYm3aoWXeWHfd9E8zxiGAXEcIwxDked57jLawBgDrTW2bRNgXdfI8xxpmgr4EZCu7vvGeZ64rgtKKYzjiLZtBZpl2XMgHRJIh13XoaoqAfZ9j6ZpxGkURW7AdV3FGaHTNKEsSyRJIiKIDjlzdur7viyelx597ZsIoxsm6/ytXw4J5L6CIPgfWBSF7I5VeVyRTzqOAwyGaTNpVoZh0DVXwEesOONp5zY4G6IYYpEJWpZFSs2CU3zAPsRuUqwVZ/bkHSsa4/035rzxlgGQgiwAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;密钥生成&quot;
+        title=&quot;&quot;
+        src=&quot;https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/fb8a0/ssh_config.png&quot;
+        srcset=&quot;https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/1a291/ssh_config.png 148w,https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/2bc4a/ssh_config.png 295w,https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/fb8a0/ssh_config.png 590w,https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/526de/ssh_config.png 885w,https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/597c7/ssh_config.png 894w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;进入ECS1终端，执行：&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;docker exec -it jenkins /bin/bash&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;进入容器环境，生成密钥对：&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;ssh-keygen -t rsa&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id=&quot;step-4-ecs允许jenkins通过ssh进行远程连接&quot;&gt;&lt;a href=&quot;#step-4-ecs%E5%85%81%E8%AE%B8jenkins%E9%80%9A%E8%BF%87ssh%E8%BF%9B%E8%A1%8C%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 4: ECS允许Jenkins通过SSH进行远程连接&lt;/h3&gt;
+&lt;p&gt;复制刚刚在容器环境生产的公钥内容&lt;code class=&quot;language-text&quot;&gt;id_rsa.pub&lt;/code&gt;，写入ECS1和ECS2的&lt;code class=&quot;language-text&quot;&gt;~/.ssh/authorized_keys&lt;/code&gt;文件，并确保两台机器放通22端口允许远程连接&lt;/p&gt;
+&lt;h3 id=&quot;step-5-配置jenkins远程ssh连接服务&quot;&gt;&lt;a href=&quot;#step-5-%E9%85%8D%E7%BD%AEjenkins%E8%BF%9C%E7%A8%8Bssh%E8%BF%9E%E6%8E%A5%E6%9C%8D%E5%8A%A1&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 5: 配置Jenkins远程SSH连接服务&lt;/h3&gt;
+&lt;p&gt;首先通过在容器环境里生产的密钥&lt;code class=&quot;language-text&quot;&gt;id_rsa&lt;/code&gt;生成全局凭据&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/ef9ea/id_rsa.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 28.85416666666667%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAYAAADDl76dAAAACXBIWXMAAAsSAAALEgHS3X78AAAAwElEQVQY05WQ6wrCMAyF+/5vN9gNnf4RJrK6zV2qvR6TjbkhDPHAR0uTnCYRbdNgfA7ohw5NW6OSN8h7hUffoiOGsZ9RP6CcUQ0Q3gUs0lqTYY26bqCUwuul4b0nApxzsNYSboc5JtgohDDBMsYiyzKkaYKiKHA6n+g8QkqJJXdPHBOL2QL/lOc54jhGkiQTURShLMupiDv+rlnxa4csNuOx+TTGTMyj2M19fftG03TiY0Y7OlyucNTBdg3/wLt+A1Lw0ylYI3BbAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;密钥&quot;
+        title=&quot;&quot;
+        src=&quot;https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/fb8a0/id_rsa.png&quot;
+        srcset=&quot;https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/1a291/id_rsa.png 148w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/2bc4a/id_rsa.png 295w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/fb8a0/id_rsa.png 590w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/526de/id_rsa.png 885w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/fa2eb/id_rsa.png 1180w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/08f6a/id_rsa.png 1770w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/ef9ea/id_rsa.png 1920w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;接着配置SSH remote hosts（系统管理/系统配置），输入ECS的公网IP、端口，还有刚刚创建的凭据，如何配置没错，右下角有个Check connection的按钮点击应该连接成功&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/82d92/ssh_remote_config.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 27.418321588725174%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAFCAYAAABFA8wzAAAACXBIWXMAAAsSAAALEgHS3X78AAAAlklEQVQY04WRWQrDMAxEc/8Llp6gkPbHjmMkeZmOHVxCcVPBYLTwNMKL9x7OOdRaD5UCUUVJCcXsEGuZKhfKOcNSxoKvaEAlRENAWFeE5wupQbnsL9AI/DijOpBvIGyPEYHy28ZB6/VfsHGZWpo4ZFNEOmQMDwcztZ6ZIopiF8Miav3EtmEAz27P+Wx5i8hLHvcbhH/xBuxDilYOH03FAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;远程连接配置&quot;
+        title=&quot;&quot;
+        src=&quot;https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/fb8a0/ssh_remote_config.png&quot;
+        srcset=&quot;https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/1a291/ssh_remote_config.png 148w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/2bc4a/ssh_remote_config.png 295w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/fb8a0/ssh_remote_config.png 590w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/526de/ssh_remote_config.png 885w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/fa2eb/ssh_remote_config.png 1180w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/82d92/ssh_remote_config.png 1561w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;h3 id=&quot;step-6-创建job愉快玩耍&quot;&gt;&lt;a href=&quot;#step-6-%E5%88%9B%E5%BB%BAjob%E6%84%89%E5%BF%AB%E7%8E%A9%E8%80%8D&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 6: 创建Job愉快玩耍&lt;/h3&gt;
+&lt;p&gt;新建一个任务，在Build阶段添加Execute shell script on remote host using ssh，选择你需要远程连接的服务器，输入连接成功后需要执行的命令，大功告成&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/11218/build_step.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 64.17281348788198%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAANCAYAAACpUE5eAAAACXBIWXMAAAsSAAALEgHS3X78AAABZ0lEQVQ4y5WT20rEMBCG+/4P5Y0g3gmLgrieuj03bbc5dw/d30xKoxaFbuEjzKTzZ2YyicqyBHE+n3E4HHA8HgNkD8OwCisFBmsRSSm9YJ7nKIoikGUZuq4D7RNKqX/RWqO+vYFgNSIhhA8mkb7vsd/vPWma+kPatvVBPguXwV/QnhQcgvMpw6ZpQiBBh5Ao7V0uF4zjGFjas+/kWialmjKc0yYBsmch+uaAiXFhTz4veDp5HS/IGPMlU8/I+S0sQg9nuCtr6Zv8AhXrppKZK5n6RZdDwlVdgztBcSUUEzUNw/vbFmkSQysBa7RD+dV4zC+oNUvfT3/U9QLPrztHjF3O0HLjsOjEAG2sm8Vh9SwSUdUZ3D8VuNskeNg2ePzk2Hz0eCncKOjhekHjUmV1hSxNUFelK1vCaDd31rgfbHgttK4hUlqEy6CLoRufx4WG9prn5zNUmqMqK8RxjCRJ/ErjsxRcm+EXzZnosaKa5hYAAAAASUVORK5CYII=&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;构建流程&quot;
+        title=&quot;&quot;
+        src=&quot;https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/fb8a0/build_step.png&quot;
+        srcset=&quot;https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/1a291/build_step.png 148w,https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/2bc4a/build_step.png 295w,https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/fb8a0/build_step.png 590w,https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/526de/build_step.png 885w,https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/11218/build_step.png 949w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;hr&gt;
+                &lt;div style=&quot;margin-top=55px; font-style: italic;&quot;&gt;(This is an article posted to my blog at overreacted.io. You can read it online by &lt;a href=&quot;https://github.com/yzhiJun/blog/基于Jenkins和Docker实现SSH远程部署/&quot;&gt;clicking here&lt;/a&gt;.)&lt;/div&gt;
+              </content:encoded></item></channel></rss>
