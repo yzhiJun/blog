@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Jamie's Blog]]></title><description><![CDATA[个人博客，随便写写.]]></description><link>https://yzhijun.github.io/blog</link><generator>RSS for Node</generator><lastBuildDate>Fri, 25 Jan 2019 09:57:42 GMT</lastBuildDate><item><title><![CDATA[基于Jenkins和Docker实现SSH远程部署]]></title><description><![CDATA[如何快速通过Docker搭建Jenkins服务，利用SSH插件实现远程自动化部署]]></description><link>https://yzhijun.github.io/blog/基于Jenkins和Docker实现SSH远程部署/</link><guid isPermaLink="false">https://yzhijun.github.io/blog/基于Jenkins和Docker实现SSH远程部署/</guid><content:encoded>&lt;p&gt;最近迁移服务，并试用了阿里的&lt;a href=&quot;https://www.aliyun.com/product/codepipeline&quot;&gt;CodePipeline&lt;/a&gt;持续集成服务，发现还是不如自己搭建Jenkins定制化部署好，本文主要介绍如何通过Docker快速搭建Jenkins服务，并利用&lt;a href=&quot;https://wiki.jenkins.io/display/JENKINS/SSH+plugin&quot;&gt;SSH+Plugin&lt;/a&gt;实现远程部署&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Jamie's Blog]]></title><description><![CDATA[个人博客，随便写写.]]></description><link>https://yzhijun.github.io/blog</link><generator>RSS for Node</generator><lastBuildDate>Fri, 25 Jan 2019 11:13:07 GMT</lastBuildDate><item><title><![CDATA[基于Jenkins和Docker实现SSH远程部署]]></title><description><![CDATA[如何通过Docker快速搭建Jenkins服务，并利用SSH插件实现远程自动化部署]]></description><link>https://yzhijun.github.io/blog/基于Jenkins和Docker实现SSH远程部署/</link><guid isPermaLink="false">https://yzhijun.github.io/blog/基于Jenkins和Docker实现SSH远程部署/</guid><content:encoded>&lt;p&gt;最近迁移服务，并试用了阿里云的&lt;a href=&quot;https://www.aliyun.com/product/codepipeline&quot;&gt;CodePipeline&lt;/a&gt;持续集成服务，发现还是不如自己搭建Jenkins定制化部署好，本文主要介绍如何通过Docker快速搭建Jenkins服务，并利用&lt;a href=&quot;https://wiki.jenkins.io/display/JENKINS/SSH+plugin&quot;&gt;SSH+Plugin&lt;/a&gt;实现远程部署&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;所需环境&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;系统：CentOS 7&lt;/li&gt;
@@ -14,16 +14,16 @@
   -v /var/run/docker.sock:/var/run/docker.sock \
   --name jenkins \
   jenkinsci/blueocean&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;由于大部分云服务默认会禁掉非常用端口，可以简单配置域名，通过nginx代理访问：&lt;/p&gt;
+&lt;p&gt;由于大部分云服务默认会禁掉非常用端口，如果不想用IP+端口访问，可以简单配置域名，通过nginx代理访问：&lt;/p&gt;
 &lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;server {
     listen    80;
-    server_name    jenkins.youdomain.com;
+    server_name    jenkins.yourdomain.com;
 
     location / {
         proxy_pass http://localhost:8080;
     }
 }&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;至此Jenkins已经在ECS1上部署好，可通过刚配置的域名进行访问，默认初始密码可通过 &lt;code class=&quot;language-text&quot;&gt;docker logs -f jenkins&lt;/code&gt; 日志获得&lt;/p&gt;
+&lt;p&gt;至此Jenkins已经在ECS1上部署好，可通过刚配置的域名进行访问，默认初始密码通过日志文件获得 &lt;code class=&quot;language-text&quot;&gt;docker logs -f jenkins&lt;/code&gt; &lt;/p&gt;
 &lt;h3 id=&quot;step-2-安装ssh插件&quot;&gt;&lt;a href=&quot;#step-2-%E5%AE%89%E8%A3%85ssh%E6%8F%92%E4%BB%B6&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 2: 安装SSH插件&lt;/h3&gt;
 &lt;p&gt;启动Jenkins后，可通过系统管理/插件管理进行SSH的插件安装&lt;/p&gt;
 &lt;p&gt;
@@ -64,7 +64,7 @@
   &lt;/a&gt;
     &lt;/p&gt;
 &lt;h3 id=&quot;step-3-生成jenkins-ssh密钥对&quot;&gt;&lt;a href=&quot;#step-3-%E7%94%9F%E6%88%90jenkins-ssh%E5%AF%86%E9%92%A5%E5%AF%B9&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 3: 生成Jenkins SSH密钥对&lt;/h3&gt;
-&lt;p&gt;由于我们的Jenkins是通过Docker进行部署，你可以把它看成一台具有独立环境的虚拟机，这样可以在容器环境里配置SSH密钥对，让Jenkins通过公网IP与宿主机ECS1或远程机ECS2进行SSH连接，这里我们通过直接修改容器的方式进行生成密钥：&lt;/p&gt;
+&lt;p&gt;由于我们的Jenkins由Docker进行部署，你可以把它看成一台具有独立环境的虚拟机，这样可以在容器环境里配置SSH密钥对，让Jenkins通过公网IP与宿主机ECS1或远程机ECS2进行SSH连接，这里我们通过直接修改容器的方式进行生成密钥：&lt;/p&gt;
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
@@ -105,9 +105,9 @@
 &lt;p&gt;进入容器环境，生成密钥对：&lt;/p&gt;
 &lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;ssh-keygen -t rsa&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id=&quot;step-4-ecs允许jenkins通过ssh进行远程连接&quot;&gt;&lt;a href=&quot;#step-4-ecs%E5%85%81%E8%AE%B8jenkins%E9%80%9A%E8%BF%87ssh%E8%BF%9B%E8%A1%8C%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 4: ECS允许Jenkins通过SSH进行远程连接&lt;/h3&gt;
-&lt;p&gt;复制刚刚在容器环境生产的公钥内容&lt;code class=&quot;language-text&quot;&gt;id_rsa.pub&lt;/code&gt;，写入ECS1和ECS2的&lt;code class=&quot;language-text&quot;&gt;~/.ssh/authorized_keys&lt;/code&gt;文件，并确保两台机器放通22端口允许远程连接&lt;/p&gt;
+&lt;p&gt;复制刚刚在容器环境生成的公钥内容&lt;code class=&quot;language-text&quot;&gt;id_rsa.pub&lt;/code&gt;，添加到ECS1和ECS2的&lt;code class=&quot;language-text&quot;&gt;~/.ssh/authorized_keys&lt;/code&gt;文件，并确保两台机器放通22端口允许远程连接&lt;/p&gt;
 &lt;h3 id=&quot;step-5-配置jenkins远程ssh连接服务&quot;&gt;&lt;a href=&quot;#step-5-%E9%85%8D%E7%BD%AEjenkins%E8%BF%9C%E7%A8%8Bssh%E8%BF%9E%E6%8E%A5%E6%9C%8D%E5%8A%A1&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 5: 配置Jenkins远程SSH连接服务&lt;/h3&gt;
-&lt;p&gt;首先通过在容器环境里生产的密钥&lt;code class=&quot;language-text&quot;&gt;id_rsa&lt;/code&gt;生成全局凭据&lt;/p&gt;
+&lt;p&gt;首先通过在容器环境里生成的密钥&lt;code class=&quot;language-text&quot;&gt;id_rsa&lt;/code&gt;生成全局凭据&lt;/p&gt;
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
@@ -145,7 +145,7 @@
   
   &lt;/a&gt;
     &lt;/p&gt;
-&lt;p&gt;接着配置SSH remote hosts（系统管理/系统配置），输入ECS的公网IP、端口，还有刚刚创建的凭据，如何配置没错，右下角有个Check connection的按钮点击应该连接成功&lt;/p&gt;
+&lt;p&gt;接着配置SSH remote hosts（系统管理/系统配置），输入ECS的公网信息，还有刚刚创建的凭据，如果配置正确，右下角Check connection的按钮点击后应该连接成功&lt;/p&gt;
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
@@ -183,7 +183,7 @@
   &lt;/a&gt;
     &lt;/p&gt;
 &lt;h3 id=&quot;step-6-创建job愉快玩耍&quot;&gt;&lt;a href=&quot;#step-6-%E5%88%9B%E5%BB%BAjob%E6%84%89%E5%BF%AB%E7%8E%A9%E8%80%8D&quot; aria-hidden class=&quot;anchor&quot;&gt;&lt;svg aria-hidden=&quot;true&quot; height=&quot;16&quot; version=&quot;1.1&quot; viewBox=&quot;0 0 16 16&quot; width=&quot;16&quot;&gt;&lt;path fill-rule=&quot;evenodd&quot; d=&quot;M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z&quot;&gt;&lt;/path&gt;&lt;/svg&gt;&lt;/a&gt;Step 6: 创建Job愉快玩耍&lt;/h3&gt;
-&lt;p&gt;新建一个任务，在Build阶段添加Execute shell script on remote host using ssh，选择你需要远程连接的服务器，输入连接成功后需要执行的命令，大功告成&lt;/p&gt;
+&lt;p&gt;新建一个任务，在Build阶段添加Execute shell script on remote host using ssh，选择需要远程连接的服务器，输入连接成功后需要执行的命令，大功告成&lt;/p&gt;
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
