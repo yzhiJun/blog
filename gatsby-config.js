@@ -3,9 +3,9 @@ module.exports = {
     title: "Jamie's Blog",
     author: 'Jamie',
     description: '个人博客，随便写写.',
-    siteUrl: 'https://github.com/yzhiJun/blog'
+    siteUrl: 'https://yzhijun.github.io/blog'
   },
-  pathPrefix: '/',
+  pathPrefix: '/blog',
   plugins: [
     {
       resolve: `gatsby-source-filesystem`,
@@ -125,8 +125,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Overreacted`,
-        short_name: `Overreacted`,
+        name: `Jamie`,
+        short_name: `Jamie`,
         start_url: `/`,
         background_color: `#ffffff`,
         theme_color: `#ffa7c4`,
