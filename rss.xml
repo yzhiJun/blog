@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Jamie's Blog]]></title><description><![CDATA[个人博客，随便写写.]]></description><link>https://github.com/yzhiJun/blog</link><generator>RSS for Node</generator><lastBuildDate>Fri, 25 Jan 2019 09:27:48 GMT</lastBuildDate><item><title><![CDATA[基于Jenkins和Docker实现SSH远程部署]]></title><description><![CDATA[如何快速通过Docker搭建Jenkins服务，利用SSH插件实现远程自动化部署]]></description><link>https://github.com/yzhiJun/blog/基于Jenkins和Docker实现SSH远程部署/</link><guid isPermaLink="false">https://github.com/yzhiJun/blog/基于Jenkins和Docker实现SSH远程部署/</guid><content:encoded>&lt;p&gt;最近迁移服务，并试用了阿里的&lt;a href=&quot;https://www.aliyun.com/product/codepipeline&quot;&gt;CodePipeline&lt;/a&gt;持续集成服务，发现还是不如自己搭建Jenkins定制化部署好，本文主要介绍如何通过Docker快速搭建Jenkins服务，并利用&lt;a href=&quot;https://wiki.jenkins.io/display/JENKINS/SSH+plugin&quot;&gt;SSH+Plugin&lt;/a&gt;实现远程部署&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Jamie's Blog]]></title><description><![CDATA[个人博客，随便写写.]]></description><link>https://yzhijun.github.io/blog</link><generator>RSS for Node</generator><lastBuildDate>Fri, 25 Jan 2019 09:57:42 GMT</lastBuildDate><item><title><![CDATA[基于Jenkins和Docker实现SSH远程部署]]></title><description><![CDATA[如何快速通过Docker搭建Jenkins服务，利用SSH插件实现远程自动化部署]]></description><link>https://yzhijun.github.io/blog/基于Jenkins和Docker实现SSH远程部署/</link><guid isPermaLink="false">https://yzhijun.github.io/blog/基于Jenkins和Docker实现SSH远程部署/</guid><content:encoded>&lt;p&gt;最近迁移服务，并试用了阿里的&lt;a href=&quot;https://www.aliyun.com/product/codepipeline&quot;&gt;CodePipeline&lt;/a&gt;持续集成服务，发现还是不如自己搭建Jenkins定制化部署好，本文主要介绍如何通过Docker快速搭建Jenkins服务，并利用&lt;a href=&quot;https://wiki.jenkins.io/display/JENKINS/SSH+plugin&quot;&gt;SSH+Plugin&lt;/a&gt;实现远程部署&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;所需环境&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;系统：CentOS 7&lt;/li&gt;
@@ -29,7 +29,7 @@
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/ef9ea/plugin_install.png&quot;
+    href=&quot;https://yzhijun.github.io/blog/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/ef9ea/plugin_install.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -48,8 +48,14 @@
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;ssh 插件安装&quot;
         title=&quot;&quot;
-        src=&quot;https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fb8a0/plugin_install.png&quot;
-        srcset=&quot;https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/1a291/plugin_install.png 148w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/2bc4a/plugin_install.png 295w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fb8a0/plugin_install.png 590w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/526de/plugin_install.png 885w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fa2eb/plugin_install.png 1180w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/08f6a/plugin_install.png 1770w,https://github.com/yzhiJun/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/ef9ea/plugin_install.png 1920w&quot;
+        src=&quot;https://yzhijun.github.io/blog/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fb8a0/plugin_install.png&quot;
+        srcset=&quot;/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/1a291/plugin_install.png 148w,
+/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/2bc4a/plugin_install.png 295w,
+/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fb8a0/plugin_install.png 590w,
+/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/526de/plugin_install.png 885w,
+/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/fa2eb/plugin_install.png 1180w,
+/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/08f6a/plugin_install.png 1770w,
+/blog/static/64d864ccb08b9cdfbb8a86e9787207b7/ef9ea/plugin_install.png 1920w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -62,7 +68,7 @@
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/597c7/ssh_config.png&quot;
+    href=&quot;https://yzhijun.github.io/blog/blog/static/fde9bf1159b653695897bd95afcea9f6/597c7/ssh_config.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -81,8 +87,12 @@
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;密钥生成&quot;
         title=&quot;&quot;
-        src=&quot;https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/fb8a0/ssh_config.png&quot;
-        srcset=&quot;https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/1a291/ssh_config.png 148w,https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/2bc4a/ssh_config.png 295w,https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/fb8a0/ssh_config.png 590w,https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/526de/ssh_config.png 885w,https://github.com/yzhiJun/blog/static/fde9bf1159b653695897bd95afcea9f6/597c7/ssh_config.png 894w&quot;
+        src=&quot;https://yzhijun.github.io/blog/blog/static/fde9bf1159b653695897bd95afcea9f6/fb8a0/ssh_config.png&quot;
+        srcset=&quot;/blog/static/fde9bf1159b653695897bd95afcea9f6/1a291/ssh_config.png 148w,
+/blog/static/fde9bf1159b653695897bd95afcea9f6/2bc4a/ssh_config.png 295w,
+/blog/static/fde9bf1159b653695897bd95afcea9f6/fb8a0/ssh_config.png 590w,
+/blog/static/fde9bf1159b653695897bd95afcea9f6/526de/ssh_config.png 885w,
+/blog/static/fde9bf1159b653695897bd95afcea9f6/597c7/ssh_config.png 894w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -101,7 +111,7 @@
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/ef9ea/id_rsa.png&quot;
+    href=&quot;https://yzhijun.github.io/blog/blog/static/793209185cc90046c9be6a696576c4e3/ef9ea/id_rsa.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -120,8 +130,14 @@
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;密钥&quot;
         title=&quot;&quot;
-        src=&quot;https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/fb8a0/id_rsa.png&quot;
-        srcset=&quot;https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/1a291/id_rsa.png 148w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/2bc4a/id_rsa.png 295w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/fb8a0/id_rsa.png 590w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/526de/id_rsa.png 885w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/fa2eb/id_rsa.png 1180w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/08f6a/id_rsa.png 1770w,https://github.com/yzhiJun/blog/static/793209185cc90046c9be6a696576c4e3/ef9ea/id_rsa.png 1920w&quot;
+        src=&quot;https://yzhijun.github.io/blog/blog/static/793209185cc90046c9be6a696576c4e3/fb8a0/id_rsa.png&quot;
+        srcset=&quot;/blog/static/793209185cc90046c9be6a696576c4e3/1a291/id_rsa.png 148w,
+/blog/static/793209185cc90046c9be6a696576c4e3/2bc4a/id_rsa.png 295w,
+/blog/static/793209185cc90046c9be6a696576c4e3/fb8a0/id_rsa.png 590w,
+/blog/static/793209185cc90046c9be6a696576c4e3/526de/id_rsa.png 885w,
+/blog/static/793209185cc90046c9be6a696576c4e3/fa2eb/id_rsa.png 1180w,
+/blog/static/793209185cc90046c9be6a696576c4e3/08f6a/id_rsa.png 1770w,
+/blog/static/793209185cc90046c9be6a696576c4e3/ef9ea/id_rsa.png 1920w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -133,7 +149,7 @@
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/82d92/ssh_remote_config.png&quot;
+    href=&quot;https://yzhijun.github.io/blog/blog/static/9d5882943b248aa9157817da33f51dd9/82d92/ssh_remote_config.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -152,8 +168,13 @@
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;远程连接配置&quot;
         title=&quot;&quot;
-        src=&quot;https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/fb8a0/ssh_remote_config.png&quot;
-        srcset=&quot;https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/1a291/ssh_remote_config.png 148w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/2bc4a/ssh_remote_config.png 295w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/fb8a0/ssh_remote_config.png 590w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/526de/ssh_remote_config.png 885w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/fa2eb/ssh_remote_config.png 1180w,https://github.com/yzhiJun/blog/static/9d5882943b248aa9157817da33f51dd9/82d92/ssh_remote_config.png 1561w&quot;
+        src=&quot;https://yzhijun.github.io/blog/blog/static/9d5882943b248aa9157817da33f51dd9/fb8a0/ssh_remote_config.png&quot;
+        srcset=&quot;/blog/static/9d5882943b248aa9157817da33f51dd9/1a291/ssh_remote_config.png 148w,
+/blog/static/9d5882943b248aa9157817da33f51dd9/2bc4a/ssh_remote_config.png 295w,
+/blog/static/9d5882943b248aa9157817da33f51dd9/fb8a0/ssh_remote_config.png 590w,
+/blog/static/9d5882943b248aa9157817da33f51dd9/526de/ssh_remote_config.png 885w,
+/blog/static/9d5882943b248aa9157817da33f51dd9/fa2eb/ssh_remote_config.png 1180w,
+/blog/static/9d5882943b248aa9157817da33f51dd9/82d92/ssh_remote_config.png 1561w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -166,7 +187,7 @@
 &lt;p&gt;
   &lt;a
     class=&quot;gatsby-resp-image-link&quot;
-    href=&quot;https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/11218/build_step.png&quot;
+    href=&quot;https://yzhijun.github.io/blog/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/11218/build_step.png&quot;
     style=&quot;display: block&quot;
     target=&quot;_blank&quot;
     rel=&quot;noopener&quot;
@@ -185,8 +206,12 @@
         style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
         alt=&quot;构建流程&quot;
         title=&quot;&quot;
-        src=&quot;https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/fb8a0/build_step.png&quot;
-        srcset=&quot;https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/1a291/build_step.png 148w,https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/2bc4a/build_step.png 295w,https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/fb8a0/build_step.png 590w,https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/526de/build_step.png 885w,https://github.com/yzhiJun/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/11218/build_step.png 949w&quot;
+        src=&quot;https://yzhijun.github.io/blog/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/fb8a0/build_step.png&quot;
+        srcset=&quot;/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/1a291/build_step.png 148w,
+/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/2bc4a/build_step.png 295w,
+/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/fb8a0/build_step.png 590w,
+/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/526de/build_step.png 885w,
+/blog/static/df180ad0042e4c18b5b17f32c20d3a6c/11218/build_step.png 949w&quot;
         sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
       /&gt;
     &lt;/span&gt;
@@ -195,5 +220,5 @@
   &lt;/a&gt;
     &lt;/p&gt;
 &lt;hr&gt;
-                &lt;div style=&quot;margin-top=55px; font-style: italic;&quot;&gt;(This is an article posted to my blog at overreacted.io. You can read it online by &lt;a href=&quot;https://github.com/yzhiJun/blog/基于Jenkins和Docker实现SSH远程部署/&quot;&gt;clicking here&lt;/a&gt;.)&lt;/div&gt;
+                &lt;div style=&quot;margin-top=55px; font-style: italic;&quot;&gt;(This is an article posted to my blog at overreacted.io. You can read it online by &lt;a href=&quot;https://yzhijun.github.io/blog/基于Jenkins和Docker实现SSH远程部署/&quot;&gt;clicking here&lt;/a&gt;.)&lt;/div&gt;
               </content:encoded></item></channel></rss>
